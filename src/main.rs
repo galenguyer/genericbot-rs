@@ -26,8 +26,9 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     // shards as is suggested by Discord.
     let scheme = ShardScheme::Auto;
 
-    // Use intents to only receive guild message events.
-    let cluster = Cluster::builder(&token, Intents::GUILD_MESSAGES)
+    // Use intents to only receive guild and DM message events.
+    let intents = Intents::GUILD_MESSAGES | Intents::DIRECT_MESSAGES;
+    let cluster = Cluster::builder(&token, intents)
         .shard_scheme(scheme)
         .build()
         .await?;
@@ -42,6 +43,11 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     // HTTP is separate from the gateway, so create a new client.
     let http = HttpClient::new(&token);
+    let current_user = http.current_user().await?;
+    info!(
+        "Logged into Discord as {}#{}",
+        current_user.name, current_user.discriminator
+    );
 
     // Since we only care about new messages, make the cache only
     // cache new messages.
