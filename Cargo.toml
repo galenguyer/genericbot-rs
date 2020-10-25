@@ -8,3 +8,13 @@ license = "AGPL-3.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tokio = { version = "0.2.22", features = ["full"] }
+tracing = "0.1.21"
+tracing-subscriber = "0.2.14"
+
+# Twilight
+twilight-cache-inmemory = "0.2.0-beta.2"
+twilight-command-parser = "0.2.0-beta.0"
+twilight-gateway = "0.2.0-beta.0"
+twilight-http = "0.2.0-beta.1"
+twilight-model = "0.2.0-beta.1"
