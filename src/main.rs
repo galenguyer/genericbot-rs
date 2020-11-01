@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::{env, error::Error};
 
 use twilight_cache_inmemory::{EventType, InMemoryCache};
@@ -11,6 +12,9 @@ use twilight_model::gateway::Intents;
 use tokio::stream::StreamExt;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
+
+pub mod context;
+use context::Context;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -67,7 +71,9 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         // Update the cache with the event.
         cache.update(&event);
 
-        tokio::spawn(handle_event(shard_id, event, http.clone()));
+        let context = Arc::new(Context::new(http.clone()));
+
+        tokio::spawn(handle_event(shard_id, event, context));
     }
 
     Ok(())
@@ -76,11 +82,12 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 async fn handle_event(
     shard_id: u64,
     event: Event,
-    http: HttpClient,
+    ctx: Arc<Context>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     match event {
         Event::MessageCreate(msg) if msg.content == "!ping" => {
-            http.create_message(msg.channel_id)
+            ctx.http
+                .create_message(msg.channel_id)
                 .content("Pong!")?
                 .await?;
         }
